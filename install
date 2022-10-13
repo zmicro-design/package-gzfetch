@@ -1,0 +1,57 @@
+#!/bin/bash
+
+VERSION=v1.0.1
+
+set -e
+
+help() {
+  echo "Usage:"
+  echo "  zmicro package install gzfetch <args...>"
+  echo ""
+}
+
+install() {
+  local arch="$(os::arch)"
+  local os="linux"
+  local bin_path=/usr/bin
+
+  if [ "$(os::is_macos)" = "true" ]; then
+    os="darwin"
+    bin_path=/usr/local/bin
+  fi
+
+  local name="gzfetch"
+
+  local tmp_file=/tmp/$name.tar.gz
+  local url="https://github.com/go-zoox/gzfetch/releases/download/$VERSION/$name-${os}-${arch}.tgz"
+  os::curl -fSL $url -o $tmp_file
+
+  cd /tmp
+  tar -zxvf $tmp_file >>/dev/null 2>&1
+
+  sudo mv bin/$name-${os}-${arch} $bin_path/$name
+
+  rm -rf $tmp_file
+}
+
+core() {
+  if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    help
+    exit 0
+  fi
+
+  install
+  if [ $? -eq 0 ]; then
+    log::success "install gzfetch success."
+    exit 0
+  else
+    log::error "install gzfetch failed."
+    exit 1
+  fi
+}
+
+run() {
+  core $@
+}
+
+run $@
