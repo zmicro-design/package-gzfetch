@@ -2,8 +2,6 @@
 
 VERSION=v1.0.1
 
-set -e
-
 help() {
   echo "Usage:"
   echo "  zmicro package install gzfetch <args...>"
@@ -11,27 +9,42 @@ help() {
 }
 
 install() {
-  local arch="$(os::arch)"
-  local os="linux"
-  local bin_path=/usr/bin
-
-  if [ "$(os::is_macos)" = "true" ]; then
-    os="darwin"
-    bin_path=/usr/local/bin
-  fi
-
+  # prepare vars
   local name="gzfetch"
+  # get system os/arch
+  local arch="$(os::arch)"
+  local kernel="$(os::kernel)"
+  local platform="$(os::platform)"
+  # usr_bin_dir
+  local usr_bin_dir=$(os::usr_bin_dir)
+  local tmp_dir="/tmp/$name"
+  # files
+  local tmp_file="$name.tar.gz"
+  local bin_file="./bin/$name-${platform}-${arch}"
 
-  local tmp_file=/tmp/$name.tar.gz
-  local url="https://github.com/go-zoox/gzfetch/releases/download/$VERSION/$name-${os}-${arch}.tgz"
+  # prepare context
+  mkdir -p $tmp_dir
+  cd $tmp_dir
+
+  # reference: https://github.com/go-zoox/gzfetch/releases
+  # example:
+  #   https://github.com/go-zoox/gzfetch/releases/download/v1.0.1/gzfetch-darwin-arm64.tgz
+  #   https://github.com/go-zoox/gzfetch/releases/download/v1.0.1/gzfetch-darwin-amd64.tgz
+  # generate url
+  local url="https://github.com/go-zoox/gzfetch/releases/download/$VERSION/${name}-${platform}-${arch}.tgz"
+  log::debug "[package][$name][$kernel][$arch] url: $url"
+
+  # download
   os::curl --progress-bar -fSL $url -o $tmp_file
 
-  cd /tmp
+  # extract
   tar -zxvf $tmp_file >>/dev/null 2>&1
 
-  sudo mv bin/$name-${os}-${arch} $bin_path/$name
+  # install
+  sudo mv $bin_file $usr_bin_dir
 
-  rm -rf $tmp_file
+  # clean
+  rm -rf $tmp_dir
 }
 
 core() {
@@ -51,7 +64,18 @@ core() {
 }
 
 run() {
-  core $@
+  core "$@"
 }
 
-run $@
+if [ "$1" = "ONE_LINE" ]; then
+  command -v zmicro # >>/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    curl -o- https://raw.githubusercontent.com/zcorky/zmicro/master/install | sh
+  fi
+
+  zmicro package install gzfetch
+else
+  set -e
+
+  run "$@"
+fi

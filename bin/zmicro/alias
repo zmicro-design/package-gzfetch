@@ -1,0 +1,35 @@
+#!/bin/bash
+
+help() {
+  echo "Usage:"
+  echo "  zmicro gzfetch <args ...>"
+  echo ""
+
+  gzfetch --help
+}
+
+version() {
+  # @TODO
+  # gzfetch --version
+  echo "v1.0.1"
+}
+
+core() {
+  case $1 in
+  -h | --help | help)
+    help
+    ;;
+  -v | --version | version)
+    version
+    ;;
+  *)
+    gzfetch "$@"
+    ;;
+  esac
+}
+
+run() {
+  core "$@"
+}
+
+run "$@"
