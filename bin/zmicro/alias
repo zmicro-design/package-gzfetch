@@ -9,9 +9,7 @@ help() {
 }
 
 version() {
-  # @TODO
-  # gzfetch --version
-  echo "v1.0.1"
+  gzfetch --version
 }
 
 core() {
