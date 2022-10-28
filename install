@@ -24,7 +24,7 @@ install() {
 
   local tmp_file=/tmp/$name.tar.gz
   local url="https://github.com/go-zoox/gzfetch/releases/download/$VERSION/$name-${os}-${arch}.tgz"
-  os::curl -fSL $url -o $tmp_file
+  os::curl --progress-bar -fSL $url -o $tmp_file
 
   cd /tmp
   tar -zxvf $tmp_file >>/dev/null 2>&1
