@@ -35,7 +35,6 @@ install() {
   log::debug "[package][$name][$kernel][$arch] url: $url"
 
   # download
-  log::info "[package][$name] download gzfetch(url: os::curl --progress-bar -fSL $url -o $tmp_file) ..."
   os::curl --progress-bar -fSL $url -o $tmp_file
 
   # extract
